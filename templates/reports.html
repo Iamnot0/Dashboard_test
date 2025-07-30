@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports - Admin Panel</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f6fa;
+            color: #333;
+            display: flex;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid #34495e;
+        }
+
+        .sidebar-header h2 {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        .sidebar-header p {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .sidebar-nav {
+            padding: 20px 0;
+        }
+
+        .nav-section {
+            margin-bottom: 30px;
+        }
+
+        .nav-section-title {
+            padding: 0 20px 10px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #bdc3c7;
+            letter-spacing: 1px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: #ecf0f1;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.1);
+            border-left-color: #3498db;
+            color: white;
+        }
+
+        .nav-item.active {
+            background: rgba(52, 152, 219, 0.2);
+            border-left-color: #3498db;
+            color: #3498db;
+        }
+
+        .nav-item i {
+            width: 20px;
+            margin-right: 12px;
+            font-size: 16px;
+        }
+
+        .nav-item span {
+            font-size: 14px;
+        }
+
+        .nav-badge {
+            background: #e74c3c;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 10px;
+            margin-left: auto;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 280px;
+            width: calc(100% - 280px);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 24px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logout-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .content-container {
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .card h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 18px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .reports-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .report-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-left: 4px solid #667eea;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .report-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .report-icon {
+            font-size: 40px;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .report-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .report-description {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .report-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: #999;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 15px;
+        }
+
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            background: #5a6fd8;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .reports-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>Client Dashboard</h2>
+            <p>Admin Control Panel</p>
+        </div>
+
+        <nav class="sidebar-nav">
+            <!-- Main Navigation -->
+            <div class="nav-section">
+                <div class="nav-section-title">Main</div>
+                <a href="/dashboard" class="nav-item">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/overview" class="nav-item">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Overview</span>
+                </a>
+                <a href="/analytics" class="nav-item">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Analytics</span>
+                </a>
+            </div>
+
+            <!-- Client Management -->
+            <div class="nav-section">
+                <div class="nav-section-title">Clients</div>
+                <a href="/clients" class="nav-item">
+                    <i class="fas fa-users"></i>
+                    <span>All Clients</span>
+                    <span class="nav-badge">{{ total_clients }}</span>
+                </a>
+                <a href="/categories" class="nav-item">
+                    <i class="fas fa-tags"></i>
+                    <span>Categories</span>
+                    <span class="nav-badge">{{ total_categories }}</span>
+                </a>
+                <a href="/recent" class="nav-item">
+                    <i class="fas fa-clock"></i>
+                    <span>Recent</span>
+                </a>
+            </div>
+
+            <!-- System -->
+            <div class="nav-section">
+                <div class="nav-section-title">System</div>
+                <a href="/settings" class="nav-item">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+                <a href="/database" class="nav-item">
+                    <i class="fas fa-database"></i>
+                    <span>Database</span>
+                </a>
+                <a href="/logs" class="nav-item">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Logs</span>
+                </a>
+            </div>
+
+            <!-- Reports -->
+            <div class="nav-section">
+                <div class="nav-section-title">Reports</div>
+                <a href="/reports" class="nav-item active">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Reports</span>
+                </a>
+                <a href="/export" class="nav-item">
+                    <i class="fas fa-download"></i>
+                    <span>Export Data</span>
+                </a>
+            </div>
+
+            <!-- User -->
+            <div class="nav-section">
+                <div class="nav-section-title">User</div>
+                <a href="/profile" class="nav-item">
+                    <i class="fas fa-user"></i>
+                    <span>Profile</span>
+                </a>
+                <a href="/logout" class="nav-item">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="header">
+            <div>
+                <h1>Reports</h1>
+            </div>
+            <div class="header-actions">
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <span>{{ session.username }}</span>
+                </div>
+                <a href="/logout" class="logout-btn">Logout</a>
+            </div>
+        </div>
+
+        <div class="content-container">
+            <!-- Available Reports -->
+            <div class="reports-grid">
+                <div class="report-card">
+                    <div class="report-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="report-title">Client Growth Report</div>
+                    <div class="report-description">Monthly analysis of client acquisition and growth trends</div>
+                    <div class="report-meta">
+                        <span>Last updated: 2 hours ago</span>
+                        <span>PDF, Excel</span>
+                    </div>
+                </div>
+                <div class="report-card">
+                    <div class="report-icon">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <div class="report-title">Category Distribution</div>
+                    <div class="report-description">Detailed breakdown of clients by category and performance</div>
+                    <div class="report-meta">
+                        <span>Last updated: 1 day ago</span>
+                        <span>PDF, CSV</span>
+                    </div>
+                </div>
+                <div class="report-card">
+                    <div class="report-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="report-title">Performance Analytics</div>
+                    <div class="report-description">System performance metrics and optimization insights</div>
+                    <div class="report-meta">
+                        <span>Last updated: 3 hours ago</span>
+                        <span>PDF, JSON</span>
+                    </div>
+                </div>
+                <div class="report-card">
+                    <div class="report-icon">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <div class="report-title">Database Health</div>
+                    <div class="report-description">Database performance, backup status, and maintenance logs</div>
+                    <div class="report-meta">
+                        <span>Last updated: 6 hours ago</span>
+                        <span>PDF, SQL</span>
+                    </div>
+                </div>
+                <div class="report-card">
+                    <div class="report-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="report-title">Security Audit</div>
+                    <div class="report-description">Security events, login attempts, and system vulnerabilities</div>
+                    <div class="report-meta">
+                        <span>Last updated: 1 week ago</span>
+                        <span>PDF, XML</span>
+                    </div>
+                </div>
+                <div class="report-card">
+                    <div class="report-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="report-title">Activity Timeline</div>
+                    <div class="report-description">User activity logs and system event timeline</div>
+                    <div class="report-meta">
+                        <span>Last updated: 1 hour ago</span>
+                        <span>PDF, CSV</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Monthly Report Chart -->
+            <div class="card">
+                <h3>Monthly Client Growth Report</h3>
+                <div class="chart-container">
+                    <canvas id="monthlyReportChart"></canvas>
+                </div>
+                <div class="button-group">
+                    <a href="/reports/pdf" class="btn">
+                        <i class="fas fa-download"></i> Download PDF
+                    </a>
+                    <a href="/export/csv" class="btn btn-secondary">
+                        <i class="fas fa-file-excel"></i> Export Excel
+                    </a>
+                    <a href="#" class="btn btn-secondary" onclick="emailReport()">
+                        <i class="fas fa-envelope"></i> Email Report
+                    </a>
+                </div>
+            </div>
+
+            <!-- Category Performance Report -->
+            <div class="card">
+                <h3>Category Performance Report</h3>
+                <div class="chart-container">
+                    <canvas id="categoryReportChart"></canvas>
+                </div>
+                <div class="button-group">
+                    <a href="/reports/pdf" class="btn">
+                        <i class="fas fa-download"></i> Download PDF
+                    </a>
+                    <a href="/export/csv" class="btn btn-secondary">
+                        <i class="fas fa-file-csv"></i> Export CSV
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get data from Flask template variables with fallbacks
+        const categories = JSON.parse('{{ categories|tojson|safe if categories else "[]" }}');
+        const categoryCounts = JSON.parse('{{ category_counts|tojson|safe if category_counts else "[]" }}');
+        
+        // Monthly Report Chart
+        const monthlyCtx = document.getElementById('monthlyReportChart').getContext('2d');
+        const monthlyReportChart = new Chart(monthlyCtx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                datasets: [{
+                    label: 'New Clients',
+                    data: [5, 8, 12, 15, 10, 18, 22, 25, 30, 28, 35, parseInt('{{ total_clients }}') || 0],
+                    borderColor: 'rgba(102, 126, 234, 1)',
+                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }, {
+                    label: 'Total Clients',
+                    data: [5, 13, 25, 40, 50, 68, 90, 115, 145, 173, 208, parseInt('{{ total_clients }}') || 0],
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.1)',
+                    tension: 0.4,
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Category Performance Report Chart
+        const categoryReportCtx = document.getElementById('categoryReportChart').getContext('2d');
+        const categoryReportChart = new Chart(categoryReportCtx, {
+            type: 'bar',
+            data: {
+                labels: categories,
+                datasets: [{
+                    label: 'Client Count',
+                    data: categoryCounts,
+                    backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                    borderColor: 'rgba(102, 126, 234, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+
+        function emailReport() {
+            fetch('/reports/email', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    alert('ℹ️ ' + data.message);
+                })
+                .catch(error => {
+                    alert('❌ Failed to send email');
+                });
+        }
+    </script>
+</body>
+</html> 

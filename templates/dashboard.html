@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client Dashboard - Admin Panel</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f6fa;
+            color: #333;
+            display: flex;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid #34495e;
+        }
+
+        .sidebar-header h2 {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        .sidebar-header p {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .sidebar-nav {
+            padding: 20px 0;
+        }
+
+        .nav-section {
+            margin-bottom: 30px;
+        }
+
+        .nav-section-title {
+            padding: 0 20px 10px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #bdc3c7;
+            letter-spacing: 1px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: #ecf0f1;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.1);
+            border-left-color: #3498db;
+            color: white;
+        }
+
+        .nav-item.active {
+            background: rgba(52, 152, 219, 0.2);
+            border-left-color: #3498db;
+            color: #3498db;
+        }
+
+        .nav-item i {
+            width: 20px;
+            margin-right: 12px;
+            font-size: 16px;
+        }
+
+        .nav-item span {
+            font-size: 14px;
+        }
+
+        .nav-badge {
+            background: #e74c3c;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 10px;
+            margin-left: auto;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 280px;
+            width: calc(100% - 280px);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 24px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logout-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .card h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 18px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 15px;
+        }
+
+        .client-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .client-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .client-item:last-child {
+            border-bottom: none;
+        }
+
+        .client-name {
+            font-weight: 500;
+        }
+
+        .client-category {
+            background: #667eea;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+
+        .system-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 500;
+            color: #666;
+        }
+
+        .info-value {
+            color: #333;
+        }
+
+        .traffic-graph {
+            height: 200px;
+            margin-top: 15px;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .dashboard-container {
+                grid-template-columns: 1fr;
+                padding: 10px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .mobile-menu-toggle {
+                display: block;
+                background: none;
+                border: none;
+                color: white;
+                font-size: 20px;
+                cursor: pointer;
+            }
+        }
+
+        .mobile-menu-toggle {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>Client Dashboard</h2>
+            <p>Admin Control Panel</p>
+        </div>
+
+        <nav class="sidebar-nav">
+            <!-- Main Navigation -->
+            <div class="nav-section">
+                <div class="nav-section-title">Main</div>
+                <a href="/dashboard" class="nav-item active">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/overview" class="nav-item">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Overview</span>
+                </a>
+                <a href="/analytics" class="nav-item">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Analytics</span>
+                </a>
+            </div>
+
+            <!-- Client Management -->
+            <div class="nav-section">
+                <div class="nav-section-title">Clients</div>
+                <a href="/clients" class="nav-item">
+                    <i class="fas fa-users"></i>
+                    <span>All Clients</span>
+                    <span class="nav-badge">{{ total_clients }}</span>
+                </a>
+                <a href="/categories" class="nav-item">
+                    <i class="fas fa-tags"></i>
+                    <span>Categories</span>
+                    <span class="nav-badge">{{ total_categories }}</span>
+                </a>
+                <a href="/recent" class="nav-item">
+                    <i class="fas fa-clock"></i>
+                    <span>Recent</span>
+                </a>
+            </div>
+
+            <!-- System -->
+            <div class="nav-section">
+                <div class="nav-section-title">System</div>
+                <a href="/settings" class="nav-item">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+                <a href="/database" class="nav-item">
+                    <i class="fas fa-database"></i>
+                    <span>Database</span>
+                </a>
+                <a href="/logs" class="nav-item">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Logs</span>
+                </a>
+            </div>
+
+            <!-- Reports -->
+            <div class="nav-section">
+                <div class="nav-section-title">Reports</div>
+                <a href="/reports" class="nav-item">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Reports</span>
+                </a>
+                <a href="/export" class="nav-item">
+                    <i class="fas fa-download"></i>
+                    <span>Export Data</span>
+                </a>
+            </div>
+
+            <!-- User -->
+            <div class="nav-section">
+                <div class="nav-section-title">User</div>
+                <a href="/profile" class="nav-item">
+                    <i class="fas fa-user"></i>
+                    <span>Profile</span>
+                </a>
+                <a href="/logout" class="nav-item">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="header">
+            <div>
+                <button class="mobile-menu-toggle" onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1>Dashboard</h1>
+            </div>
+            <div class="header-actions">
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <span>{{ session.username }}</span>
+                </div>
+                <a href="/logout" class="logout-btn">Logout</a>
+            </div>
+        </div>
+
+        <div class="dashboard-container">
+            <!-- Client Distribution Chart -->
+            <div class="card">
+                <h3>Client Distribution by Category</h3>
+                <div class="chart-container">
+                    <canvas id="pieChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Statistics Overview -->
+            <div class="card">
+                <h3>Statistics Overview</h3>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-number">{{ total_clients }}</div>
+                        <div class="stat-label">Total Clients</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">{{ total_categories }}</div>
+                        <div class="stat-label">Categories</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">{{ avg_clients_per_category }}</div>
+                        <div class="stat-label">Avg per Category</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">{{ largest_category }}</div>
+                        <div class="stat-label">Largest Category</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Information -->
+            <div class="card">
+                <h3>System Information</h3>
+                <div class="system-info">
+                    <div class="info-item">
+                        <span class="info-label">Database:</span>
+                        <span class="info-value">MySQL</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Server:</span>
+                        <span class="info-value">Flask</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Status:</span>
+                        <span class="info-value" style="color: #27ae60;">Online</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Last Updated:</span>
+                        <span class="info-value">{{ current_time }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Category Breakdown -->
+            <div class="card">
+                <h3>Category Breakdown</h3>
+                <div class="chart-container">
+                    <canvas id="barChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Recent Clients -->
+            <div class="card">
+                <h3>Recent Clients</h3>
+                <div class="client-list">
+                    {% for client in recent_clients %}
+                    <div class="client-item">
+                        <span class="client-name">{{ client.name }}</span>
+                        <span class="client-category">{{ client.category }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Traffic Graph -->
+            <div class="card">
+                <h3>Client Activity</h3>
+                <div class="traffic-graph">
+                    <canvas id="lineChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get data from Flask template variables with fallbacks
+        const categories = JSON.parse('{{ categories|tojson|safe if categories else "[]" }}');
+        const categoryCounts = JSON.parse('{{ category_counts|tojson|safe if category_counts else "[]" }}');
+        
+        // Sidebar functionality
+        function setActiveTab(tabName) {
+            // Remove active class from all nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Add active class to clicked item
+            event.target.closest('.nav-item').classList.add('active');
+            
+            // Here you can add logic to show different content based on tab
+            console.log('Switched to:', tabName);
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('open');
+        }
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('sidebar');
+            const mobileToggle = document.querySelector('.mobile-menu-toggle');
+            
+            if (window.innerWidth <= 768) {
+                if (!sidebar.contains(event.target) && !mobileToggle.contains(event.target)) {
+                    sidebar.classList.remove('open');
+                }
+            }
+        });
+
+        // Pie Chart for Client Distribution
+        const pieCtx = document.getElementById('pieChart').getContext('2d');
+        const pieChart = new Chart(pieCtx, {
+            type: 'doughnut',
+            data: {
+                labels: categories,
+                datasets: [{
+                    data: categoryCounts,
+                    backgroundColor: [
+                        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
+                        '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF',
+                        '#4BC0C0', '#FF6384'
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true
+                        }
+                    }
+                }
+            }
+        });
+
+        // Bar Chart for Category Breakdown
+        const barCtx = document.getElementById('barChart').getContext('2d');
+        const barChart = new Chart(barCtx, {
+            type: 'bar',
+            data: {
+                labels: categories,
+                datasets: [{
+                    label: 'Number of Clients',
+                    data: categoryCounts,
+                    backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                    borderColor: 'rgba(102, 126, 234, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+
+        // Line Chart for Client Activity (simulated data)
+        const lineCtx = document.getElementById('lineChart').getContext('2d');
+        const lineChart = new Chart(lineCtx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'New Clients',
+                    data: [12, 19, 15, 25, 22, 30],
+                    borderColor: 'rgba(102, 126, 234, 1)',
+                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

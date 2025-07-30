@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - Admin Panel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f6fa;
+            color: #333;
+            display: flex;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid #34495e;
+        }
+
+        .sidebar-header h2 {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        .sidebar-header p {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .sidebar-nav {
+            padding: 20px 0;
+        }
+
+        .nav-section {
+            margin-bottom: 30px;
+        }
+
+        .nav-section-title {
+            padding: 0 20px 10px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #bdc3c7;
+            letter-spacing: 1px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: #ecf0f1;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.1);
+            border-left-color: #3498db;
+            color: white;
+        }
+
+        .nav-item.active {
+            background: rgba(52, 152, 219, 0.2);
+            border-left-color: #3498db;
+            color: #3498db;
+        }
+
+        .nav-item i {
+            width: 20px;
+            margin-right: 12px;
+            font-size: 16px;
+        }
+
+        .nav-item span {
+            font-size: 14px;
+        }
+
+        .nav-badge {
+            background: #e74c3c;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 10px;
+            margin-left: auto;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 280px;
+            width: calc(100% - 280px);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 24px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logout-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .content-container {
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .card h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 18px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 30px;
+        }
+
+        .profile-sidebar {
+            text-align: center;
+        }
+
+        .profile-avatar {
+            width: 150px;
+            height: 150px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 60px;
+            color: white;
+        }
+
+        .profile-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .profile-role {
+            color: #667eea;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .profile-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 20px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 12px;
+        }
+
+        .profile-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn:hover {
+            background: #5a6fd8;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-outline:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .activity-list {
+            list-style: none;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            background: #667eea;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin-right: 15px;
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .activity-description {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .activity-time {
+            color: #999;
+            font-size: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .profile-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>Client Dashboard</h2>
+            <p>Admin Control Panel</p>
+        </div>
+
+        <nav class="sidebar-nav">
+            <!-- Main Navigation -->
+            <div class="nav-section">
+                <div class="nav-section-title">Main</div>
+                <a href="/dashboard" class="nav-item">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/overview" class="nav-item">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Overview</span>
+                </a>
+                <a href="/analytics" class="nav-item">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Analytics</span>
+                </a>
+            </div>
+
+            <!-- Client Management -->
+            <div class="nav-section">
+                <div class="nav-section-title">Clients</div>
+                <a href="/clients" class="nav-item">
+                    <i class="fas fa-users"></i>
+                    <span>All Clients</span>
+                    <span class="nav-badge">{{ total_clients }}</span>
+                </a>
+                <a href="/categories" class="nav-item">
+                    <i class="fas fa-tags"></i>
+                    <span>Categories</span>
+                    <span class="nav-badge">{{ total_categories }}</span>
+                </a>
+                <a href="/recent" class="nav-item">
+                    <i class="fas fa-clock"></i>
+                    <span>Recent</span>
+                </a>
+            </div>
+
+            <!-- System -->
+            <div class="nav-section">
+                <div class="nav-section-title">System</div>
+                <a href="/settings" class="nav-item">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+                <a href="/database" class="nav-item">
+                    <i class="fas fa-database"></i>
+                    <span>Database</span>
+                </a>
+                <a href="/logs" class="nav-item">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Logs</span>
+                </a>
+            </div>
+
+            <!-- Reports -->
+            <div class="nav-section">
+                <div class="nav-section-title">Reports</div>
+                <a href="/reports" class="nav-item">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Reports</span>
+                </a>
+                <a href="/export" class="nav-item">
+                    <i class="fas fa-download"></i>
+                    <span>Export Data</span>
+                </a>
+            </div>
+
+            <!-- User -->
+            <div class="nav-section">
+                <div class="nav-section-title">User</div>
+                <a href="/profile" class="nav-item active">
+                    <i class="fas fa-user"></i>
+                    <span>Profile</span>
+                </a>
+                <a href="/logout" class="nav-item">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="header">
+            <div>
+                <h1>User Profile</h1>
+            </div>
+            <div class="header-actions">
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <span>{{ session.username }}</span>
+                </div>
+                <a href="/logout" class="logout-btn">Logout</a>
+            </div>
+        </div>
+
+        <div class="content-container">
+            <div class="profile-grid">
+                <!-- Profile Sidebar -->
+                <div class="profile-sidebar">
+                    <div class="profile-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="profile-name">{{ session.username }}</div>
+                    <div class="profile-role">Administrator</div>
+                    
+                    <div class="profile-stats">
+                        <div class="stat-item">
+                            <div class="stat-number">{{ total_clients }}</div>
+                            <div class="stat-label">Clients</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">{{ total_categories }}</div>
+                            <div class="stat-label">Categories</div>
+                        </div>
+                    </div>
+
+                    <div class="profile-actions">
+                        <button class="btn" onclick="editProfile()">
+                            <i class="fas fa-edit"></i> Edit Profile
+                        </button>
+                        <button class="btn btn-outline" onclick="changePhoto()">
+                            <i class="fas fa-camera"></i> Change Photo
+                        </button>
+                        <button class="btn btn-secondary" onclick="securitySettings()">
+                            <i class="fas fa-shield-alt"></i> Security
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Profile Content -->
+                <div class="profile-content">
+                    <!-- Personal Information -->
+                    <div class="card">
+                        <h3>Personal Information</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">First Name</label>
+                                <input type="text" class="form-input" value="Admin" placeholder="Enter first name">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Last Name</label>
+                                <input type="text" class="form-input" value="User" placeholder="Enter last name">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Email Address</label>
+                            <input type="email" class="form-input" value="admin@example.com" placeholder="Enter email address">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Phone Number</label>
+                            <input type="tel" class="form-input" value="+1 (555) 123-4567" placeholder="Enter phone number">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Location</label>
+                            <input type="text" class="form-input" value="New York, NY" placeholder="Enter location">
+                        </div>
+                        <div class="button-group">
+                            <button class="btn" onclick="saveProfileChanges()">Save Changes</button>
+                            <button class="btn btn-secondary" onclick="cancelProfileChanges()">Cancel</button>
+                        </div>
+                    </div>
+
+                    <!-- Account Settings -->
+                    <div class="card">
+                        <h3>Account Settings</h3>
+                        <div class="form-group">
+                            <label class="form-label">Username</label>
+                            <input type="text" class="form-input" value="{{ session.username }}" placeholder="Enter username">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Current Password</label>
+                            <input type="password" class="form-input" placeholder="Enter current password">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">New Password</label>
+                                <input type="password" class="form-input" placeholder="Enter new password">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Confirm Password</label>
+                                <input type="password" class="form-input" placeholder="Confirm new password">
+                            </div>
+                        </div>
+                        <div class="button-group">
+                            <button class="btn" onclick="updatePassword()">Update Password</button>
+                            <button class="btn btn-secondary" onclick="cancelPasswordChange()">Cancel</button>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="card">
+                        <h3>Recent Activity</h3>
+                        <ul class="activity-list">
+                            <li class="activity-item">
+                                <div class="activity-icon">
+                                    <i class="fas fa-sign-in-alt"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-title">Logged in to the system</div>
+                                    <div class="activity-description">Successfully authenticated from IP 192.168.1.100</div>
+                                    <div class="activity-time">2 minutes ago</div>
+                                </div>
+                            </li>
+                            <li class="activity-item">
+                                <div class="activity-icon">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-title">Viewed client list</div>
+                                    <div class="activity-description">Accessed the clients management page</div>
+                                    <div class="activity-time">15 minutes ago</div>
+                                </div>
+                            </li>
+                            <li class="activity-item">
+                                <div class="activity-icon">
+                                    <i class="fas fa-chart-pie"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-title">Generated analytics report</div>
+                                    <div class="activity-description">Created monthly client growth report</div>
+                                    <div class="activity-time">1 hour ago</div>
+                                </div>
+                            </li>
+                            <li class="activity-item">
+                                <div class="activity-icon">
+                                    <i class="fas fa-download"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-title">Exported client data</div>
+                                    <div class="activity-description">Downloaded CSV export with {{ total_clients }} records</div>
+                                    <div class="activity-time">3 hours ago</div>
+                                </div>
+                            </li>
+                            <li class="activity-item">
+                                <div class="activity-icon">
+                                    <i class="fas fa-cog"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-title">Updated system settings</div>
+                                    <div class="activity-description">Modified notification preferences</div>
+                                    <div class="activity-time">1 day ago</div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function editProfile() {
+            alert('Edit profile functionality would open a modal or form here with fields for:\n• Name\n• Email\n• Phone\n• Department\n• Role\n• Profile picture');
+        }
+
+        function changePhoto() {
+            alert('Photo upload functionality would:\n1. Open file picker\n2. Validate image format\n3. Resize if needed\n4. Upload to server\n5. Update profile picture');
+        }
+
+        function securitySettings() {
+            alert('Security settings would redirect to a security page with:\n• Two-factor authentication\n• Password policies\n• Session management\n• Login history\n• Security alerts');
+        }
+
+        function saveProfileChanges() {
+            const button = event.target;
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+            button.disabled = true;
+            
+            fetch('/profile/save', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    alert('✅ ' + data.message);
+                })
+                .catch(error => {
+                    alert('❌ Failed to save profile');
+                })
+                .finally(() => {
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                });
+        }
+
+        function cancelProfileChanges() {
+            if (confirm('Are you sure you want to cancel? All changes will be lost.')) {
+                location.reload();
+            }
+        }
+
+        function updatePassword() {
+            const button = event.target;
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
+            button.disabled = true;
+            
+            fetch('/profile/change-password', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    alert('✅ ' + data.message);
+                })
+                .catch(error => {
+                    alert('❌ Failed to update password');
+                })
+                .finally(() => {
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                });
+        }
+
+        function cancelPasswordChange() {
+            if (confirm('Are you sure you want to cancel password change?')) {
+                // Clear password fields
+                const passwordFields = document.querySelectorAll('input[type="password"]');
+                passwordFields.forEach(field => field.value = '');
+            }
+        }
+    </script>
+</body>
+</html> 

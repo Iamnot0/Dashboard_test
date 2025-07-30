@@ -1,0 +1,10 @@
+USE client_data;
+
+-- Add missing columns to the clients table
+ALTER TABLE clients 
+ADD COLUMN email VARCHAR(255) AFTER category,
+ADD COLUMN phone VARCHAR(50) AFTER email,
+ADD COLUMN address TEXT AFTER phone,
+ADD COLUMN notes TEXT AFTER address,
+ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP; 

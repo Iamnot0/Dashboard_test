@@ -1,0 +1,6 @@
+USE client_data;
+
+-- Add timestamp columns to the clients table
+ALTER TABLE clients 
+ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP; 
